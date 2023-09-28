@@ -4,8 +4,8 @@ import "./font/iconfont.css";
 
 type IconProps = {
   name: string;
-  style?: string | CSSProperties;
   class?: string;
+  style?: string | CSSProperties;
 };
 
 export default defineComponent<IconProps>(

@@ -56,6 +56,8 @@ function handleLogout() {
 function handleUpdatePasswd() {
   router.push("/update-password");
 }
+
+watch(openKeys, () => console.log(openKeys.value, 11111))
 </script>
 
 <template>
@@ -72,7 +74,7 @@ function handleUpdatePasswd() {
         :items="menuItems as any"
         :inlineCollapsed="menuCollapse"
         :selectedKeys="selectedKeys"
-        :openKeys="openKeys"
+        v-model:openKeys="openKeys"
         @select="handleChangeSelectedKeys"
       />
     </Sider>

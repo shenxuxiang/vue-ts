@@ -8,6 +8,7 @@ import { Button } from "ant-design-vue";
 import useMainStore from "@/store/main";
 import { storeToRefs } from "pinia";
 
+
 const mainStore = useMainStore();
 const { regionList, workSeasonList, productTypeList, workTypeList } =
   storeToRefs(mainStore);

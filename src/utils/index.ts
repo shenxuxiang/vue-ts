@@ -224,3 +224,13 @@ export function getViewportSize() {
     document.body.clientHeight;
   return { width, height };
 }
+/**
+ * 延迟
+ * @param time 延迟的时间
+ * @param value 需要返回的内容
+*/
+export function delay(time: number, value?: any) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(value), time);
+  });
+}

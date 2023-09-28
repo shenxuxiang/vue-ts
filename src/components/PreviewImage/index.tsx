@@ -1,5 +1,11 @@
-import PreviewImage from "./index.vue";
+import PreviewImage, { PreviewImageProps } from "./index.vue";
 import SuperPreviewImage from "./SuperPreviewImage.vue";
+import { DefineComponent } from 'vue';
 
-PreviewImage.SuperPreviewImage = SuperPreviewImage;
-export default PreviewImage;
+const _default = PreviewImage as DefineComponent<PreviewImageProps> & { SuperPreviewImage: typeof SuperPreviewImage };
+
+_default.SuperPreviewImage = SuperPreviewImage
+
+export default _default;
+
+export { SuperPreviewImage };

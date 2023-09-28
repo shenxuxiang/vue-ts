@@ -6,7 +6,7 @@ type PreviewImageProps = {
   imageElement: HTMLImageElement;
 };
 
-type PreviewImageEvents = (e: "close") => void;
+type PreviewImageEvents = (e: "close", event: any) => void;
 
 const props = withDefaults(defineProps<PreviewImageProps>(), {});
 defineEmits<PreviewImageEvents>();

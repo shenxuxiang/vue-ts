@@ -1,5 +1,4 @@
 import { defineConfig, loadEnv, splitVendorChunkPlugin } from 'vite';
-import { viteExternalsPlugin } from 'vite-plugin-externals';
 import postcssPresetEnv from 'postcss-preset-env';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import legacy from '@vitejs/plugin-legacy';
@@ -21,7 +20,6 @@ export default defineConfig(({ mode }) => {
     define: define,
     publicDir: path.resolve(__dirname, 'public'),
     plugins: [
-      viteExternalsPlugin({ bmapgl: 'BMapGL' }),
       vue(),
       vueJsx(),
       legacy(),

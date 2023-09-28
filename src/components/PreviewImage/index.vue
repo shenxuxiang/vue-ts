@@ -5,7 +5,7 @@ import ToolBar from "./ToolBar.vue";
 import Slider from "./Slider.vue";
 import { ref, watch } from "vue";
 
-type PreviewImageProps = {
+export type PreviewImageProps = {
   pageSize?: number;
   imgs: string[];
   index?: number;
@@ -170,12 +170,12 @@ function handleChangeIndicator(index: number) {
 }
 
 // 上一张
-function handlePrevItem() {
+function handlePrevItem() {console.log(1111)
   if (indicator.value <= 0) return;
   handleChangeIndicator(indicator.value - 1);
 }
 // 下一张
-function handleNextItem() {
+function handleNextItem() {console.log(2222)
   if (indicator.value >= props.imgs.length - 1) return;
   handleChangeIndicator(indicator.value + 1);
 }
@@ -258,7 +258,7 @@ function handleClosePreview(event: any) {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 99;
+  z-index: 1000;
   background: rgba(0, 0, 0, 0.5);
 }
 .qm-vnit-preview-image-x {

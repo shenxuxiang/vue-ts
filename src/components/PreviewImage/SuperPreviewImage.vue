@@ -240,13 +240,13 @@ function handleClosePreview(event: any) {
 </script>
 
 <template>
-  <transition name="previewImage">
-    <section v-show="open" class="qm-vnit-preview-image">
+  <transition name="superPreviewImage">
+    <section v-show="open" class="qm-vnit-super-preview-image">
       <Loading size="default" theme="light" :open="showLoading" />
       <!-- 图片预览部分 -->
       <div
         ref="imgXRef"
-        class="qm-vnit-preview-image-x"
+        class="qm-vnit-super-preview-image-x"
         @mousewheel="onMouseWheel"
         @mousemove="onMouseMove"
         @click="handleClosePreview"
@@ -263,7 +263,7 @@ function handleClosePreview(event: any) {
       <ToolBar :imageElement="imgRef!" @close="handleClosePreview" />
       <div
         :class="[
-          'qm-vnit-preview-image-prev-buttton',
+          'qm-vnit-super-preview-image-prev-buttton',
           { disabled: indicator <= 0 },
         ]"
         @click="handlePrevItem"
@@ -272,7 +272,7 @@ function handleClosePreview(event: any) {
       </div>
       <div
         :class="[
-          'qm-vnit-preview-image-next-buttton',
+          'qm-vnit-super-preview-image-next-buttton',
           { disabled: indicator >= _imgs.length - 1 },
         ]"
         @click="handleNextItem"
@@ -292,25 +292,25 @@ function handleClosePreview(event: any) {
 </template>
 
 <style lang="less">
-.previewImage-enter-from,
-.previewImage-leave-to {
+.superPreviewImage-enter-from,
+.superPreviewImage-leave-to {
   opacity: 0;
 }
-.previewImage-enter-active,
-.previewImage-leave-active {
+.superPreviewImage-enter-active,
+.superPreviewImage-leave-active {
   transition: opacity 0.3s ease;
 }
 
-.qm-vnit-preview-image {
+.qm-vnit-super-preview-image {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 99;
+  z-index: 1000;
   background: rgba(0, 0, 0, 0.5);
 }
-.qm-vnit-preview-image-x {
+.qm-vnit-super-preview-image-x {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -330,8 +330,8 @@ function handleClosePreview(event: any) {
     transition: transform 0.3s ease;
   }
 }
-.qm-vnit-preview-image-prev-buttton,
-.qm-vnit-preview-image-next-buttton {
+.qm-vnit-super-preview-image-prev-buttton,
+.qm-vnit-super-preview-image-next-buttton {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -355,11 +355,11 @@ function handleClosePreview(event: any) {
     transition: all 0.3s ease 0.1s;
   }
 }
-.qm-vnit-preview-image-prev-buttton {
+.qm-vnit-super-preview-image-prev-buttton {
   left: 0;
   border-radius: 0 4px 4px 0;
 }
-.qm-vnit-preview-image-next-buttton {
+.qm-vnit-super-preview-image-next-buttton {
   right: 0;
   border-radius: 4px 0 0 4px;
 }

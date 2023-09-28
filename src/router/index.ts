@@ -59,7 +59,7 @@ router.beforeEach(async (...args: any) => {
     const token = getToken();
 
     // 验证用户是否已经登录
-    if (requiresAuth && !token && fullPath !== "/login") {
+    if (!token && fullPath !== "/login") {
       message.warning("请先完成用户登录");
       router.push(`/login?redirect=${encodeURIComponent(fullPath)}`);
       return;
@@ -67,9 +67,8 @@ router.beforeEach(async (...args: any) => {
 
     const mainStore = useMainStore();
     const { userInfo, permissions } = storeToRefs(mainStore);
-    const { queryUserInfo } = mainStore;
 
-    if (isEmpty(userInfo.value)) await queryUserInfo();
+    if (isEmpty(userInfo.value)) await mainStore.queryUserInfo();
 
     // 查看用户是否可以访问目标路由。
     const hasPermit = [...permissions.value].some((path) =>

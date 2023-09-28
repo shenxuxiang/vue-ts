@@ -42,7 +42,7 @@ function cancelRequest() {
   } else {
     abortController = new AbortController();
   }
-}
+} 
 
 const defaultConfigOptions: AxiosRequestConfig = {
   baseURL: "",
@@ -121,11 +121,10 @@ class Request {
     const { response, code, request } = error;
     if (response) {
       this.checkStatus(response!.status);
+    } else if (code === "ERR_CANCELED") {
+      console.log(`${request.url}：请求已取消！`);
     } else if (!window.navigator.onLine) {
       message.error("网络连接失败！");
-    } else if (code === "ERR_CANCELED") {
-      console.log("请求已被取消 >>>");
-      console.log(request.url);
     } else {
       message.error("请求失败，请联系管理员！");
     }

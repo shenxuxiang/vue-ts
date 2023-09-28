@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { QueryList, Cols } from "@/components/ContentFormHead/index.vue";
+import type { QueryList, Cols } from "@/components/ContentFormHeader";
 import ContentFormHeader from "@/components/ContentFormHeader";
 import { reactive, ref, watch, computed, toRef } from "vue";
 import { Table, Pagination } from "ant-design-vue";
@@ -156,11 +156,7 @@ function getTableList() {
     loading.value = true;
     props
       .queryTableList(params)
-      .then((res: any) => {
-        const { code, data } = res;
-        if (code === 0)
-          Object.assign(tableResource, props.customResponse(data));
-      })
+      .then((res: any) => Object.assign(tableResource, props.customResponse(res.data)))
       .finally(() => (loading.value = false));
   }
 }
