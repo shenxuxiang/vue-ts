@@ -4,8 +4,8 @@ import {
   exportProductAnalysis,
 } from "@/services/statisticsAnalyseOfAnalyse";
 import { UpOutlined, DownOutlined } from "@ant-design/icons-vue";
-import ContentFormTable from "@/components/ContentFormTable";
 import { Button, DatePicker, message } from "ant-design-vue";
+import { ContentFormTable } from "qm-vnit-vue";
 import { isEmpty, toFixed } from "@/utils";
 import useMainStore from "@/store/main";
 import { ref, computed, h } from "vue";

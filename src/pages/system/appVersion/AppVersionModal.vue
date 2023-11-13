@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, shallowRef, watch } from "vue";
 import { Modal, Input, Radio, Form, message } from "ant-design-vue";
-import UploadFile from "@/components/UploadFile";
-import { getToken } from "@/utils";
+import { ref, shallowRef, watch } from "vue";
+import { UploadFile } from "qm-vnit-vue";
+import { getUserToken } from "@/utils";
 
 type AppVersionModalProps = {
   open: boolean;
@@ -19,7 +19,7 @@ const { TextArea } = Input;
 const labelCol = { span: 4 };
 const wrapperCol = { span: 18 };
 const { useForm, Item: FormItem } = Form;
-const headers = { Authorization: getToken() };
+const headers = { Authorization: 'Bearer  ' + getUserToken() };
 
 const loading = ref(false);
 const formModels = ref({

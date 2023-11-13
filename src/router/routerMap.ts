@@ -1,5 +1,8 @@
-import { h } from "vue";
-import LazyLoader from "@/components/LazyLoader";
+import { h } from 'vue';
+import type { VNode } from 'vue';
+import { isEmpty } from '@/utils';
+import LazyLoader from '@/components/LazyLoader';
+import type { RouteMeta, RouteComponent } from 'vue-router';
 import {
   HomeOutlined,
   TeamOutlined,
@@ -11,14 +14,30 @@ import {
   FileTextOutlined,
   DatabaseOutlined,
   AreaChartOutlined,
-  // FileSearchOutlined,
   UserSwitchOutlined,
-  // ReconciliationOutlined,
 } from "@ant-design/icons-vue";
 
-const iconStyle = "font-size: 18px; margin-right: 10px";
+export type MenuItems = {
+  key: string;
+  label?: string;
+  icon?: () => VNode;
+  children?: MenuItems;
+}[];
 
-export default [
+export type RouterItem = {
+  path: string;
+  name?: string;
+  label?: string;
+  meta?: RouteMeta;
+  redirect?: string;
+  icon?: () => VNode;
+  children?: RouterItem[];
+  component?: RouteComponent;
+};
+
+const iconStyle = 'font-size: 18px; margin-right: 10px';
+
+const routerMap: RouterItem[] = [
   {
     path: "/work-info",
     name: "workInfo",
@@ -62,6 +81,7 @@ export default [
   },
   {
     path: "/system",
+    name: 'system',
     label: "系统设置",
     icon: () => h(SettingOutlined, { style: iconStyle }),
     children: [
@@ -116,3 +136,75 @@ export default [
     redirect: "/work-info",
   },
 ];
+
+export default routerMap;
+
+/**
+ * 获取用户菜单列表
+ * @param permissions 用户路由权限
+ * @param routes 路由配置
+ * @returns
+ */
+export function getMenuItems(permissions: Map<string, { name: string; path: string }>, routes = routerMap) {
+  const menuItems: MenuItems = [];
+
+  routes.forEach((route) => {
+    const { label, path, icon, children } = route;
+    if (permissions.has(path)) {
+      const item: MenuItems[number] = { label, icon, key: path };
+      if (children && children.length > 0) {
+        item.children = getMenuItems(permissions, children!);
+      }
+
+      menuItems.push(item);
+    }
+  });
+
+  return menuItems;
+}
+
+/**
+ * 获取用户访问权限集合
+ * @param resourceTree
+ * @returns
+ */
+export function getPermissions(resourceTree: any[]) {
+  const stack = [...resourceTree];
+  const menuMap = new Map<string, { name: string; path: string }>();
+
+  while (stack.length) {
+    const item = stack.shift();
+    const { code, children, name, type, path } = item;
+    let routePath = '';
+    if (type === 1 || type === 2) routePath = code;
+    if (type === 3) routePath = path;
+    if (routePath) {
+      menuMap.set(routePath, { path: routePath, name });
+      let length = children?.length ?? 0;
+      
+      while (length--) {
+        stack.unshift(children[length]);
+      }
+    }
+  }
+
+  return menuMap;
+}
+
+/**
+ * 找出菜单的第一项。
+ * @param menuItems 用户菜单列表
+ * @returns
+ */
+export function getHomePagePath(menuItems: MenuItems) {
+  if (isEmpty(menuItems)) return null;
+
+  const stack = [menuItems[0]];
+  let firstItem = {} as (typeof menuItems)[number];
+  while (stack.length) {
+    firstItem = stack.shift()!;
+    if (firstItem?.children?.length) stack.push(firstItem.children[0]);
+  }
+
+  return firstItem?.key ?? null;
+}

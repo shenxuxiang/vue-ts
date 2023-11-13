@@ -8,8 +8,7 @@ import {
 } from "@/services/systemDict";
 import { ref, computed, watch } from "vue";
 import { Button, Space, Popconfirm, message } from "ant-design-vue";
-import ContentFormTable from "@/components/ContentFormTable";
-import ModuleTree from "@/components/ModuleTree";
+import { ContentFormTable, ModelTree } from "qm-vnit-vue";
 import useSystemStore from "@/store/system";
 import DictModal from "./DictModal.vue";
 import useMainStore from "@/store/main";
@@ -18,10 +17,8 @@ import { isEmpty } from "@/utils";
 import dayjs from "dayjs";
 
 const mainStore = useMainStore();
-const { userInfo } = storeToRefs(mainStore);
-const { buttonNameList } = userInfo.value;
-const { queryWorkTypeList, queryProductTypeList, queryWorkSeasonList } =
-  mainStore;
+
+const { queryWorkTypeList, queryProductTypeList, queryWorkSeasonList } = mainStore;
 
 const systemStore = useSystemStore();
 const { queryDictTypeList } = systemStore;
@@ -35,6 +32,7 @@ const pageSize = ref(10);
 const showModal = ref(false);
 const dictType = ref<string[]>([]);
 const tableRef = ref<InstanceType<typeof ContentFormTable>>();
+
 const columns = computed(() => [
   {
     title: "序号",
@@ -80,7 +78,7 @@ watch(
 );
 
 // 字典类型改变
-function handleChangeDictType(checkedKeys: string[]) {
+function handleChangeDictType(checkedKeys: any) {
   dictType.value = checkedKeys.slice(-1);
 }
 
@@ -139,7 +137,7 @@ function handleSuccessModal() {
   <section v-if="dictTypeList?.length" class="dictionary-page">
     <section class="side">
       <h3>字典类型</h3>
-      <ModuleTree
+      <ModelTree
         :treeData="dictTypeList"
         :checkedKeys="dictType"
         @update:checkedKeys="handleChangeDictType"
@@ -168,20 +166,16 @@ function handleSuccessModal() {
 
         <template v-else-if="column.dataIndex === 'action'">
           <Space style="margin-left: -16px">
-            <template v-if="buttonNameList.includes('btn.Dict.remove')">
-              <Popconfirm
-                title="你确定要删除这行内容吗？"
-                @confirm="handleDelete(record.dictId)"
-              >
-                <Button danger type="link"> 删除 </Button>
-              </Popconfirm>
-            </template>
+            <Popconfirm
+              title="你确定要删除这行内容吗？"
+              @confirm="handleDelete(record.dictId)"
+            >
+              <Button danger type="link" v-auth="'btn.Dict.remove'"> 删除 </Button>
+            </Popconfirm>
 
-            <template v-if="buttonNameList.includes('btn.Dict.update')">
-              <Button type="link" @click="handleEdit(record.dictId)">
-                编辑
-              </Button>
-            </template>
+            <Button type="link" @click="handleEdit(record.dictId)" v-auth="'btn.Dict.update'">
+              编辑
+            </Button>
           </Space>
         </template>
       </template>

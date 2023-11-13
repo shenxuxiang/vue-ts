@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { queryWorkManageTableList, deleteRecord } from "@/services/workManage";
 import { h, ref, reactive, shallowReactive, computed } from "vue";
-import ContentFormTable from "@/components/ContentFormTable";
 import { Button, Popconfirm, message } from "ant-design-vue";
 import OperatorSelect from "@/components/OperatorSelect.vue";
+import { ContentFormTable } from "qm-vnit-vue";
 import { isEmpty, toFixed } from "@/utils";
 import useMainstore from "@/store/main";
 import { storeToRefs } from "pinia";
 
 const mainStore = useMainstore();
-const { userInfo, regionList, workSeasonList, productTypeList, workTypeList } =
+const { regionList, workSeasonList, productTypeList, workTypeList } =
   storeToRefs(mainStore);
 const {
   queryRegionList,
@@ -189,8 +189,8 @@ function handlePaginationChange(pageNum: number, pageSize: number) {
         </Button>
 
         <Button
-          v-if="userInfo?.buttonNameList?.includes?.('btn.Work.update')"
           type="link"
+          v-auth="'btn.Work.update'"
           style="margin-left: -16px"
           @click="handleNavigateEditDetail(record.workId, record)"
         >
@@ -198,7 +198,7 @@ function handlePaginationChange(pageNum: number, pageSize: number) {
         </Button>
 
         <Popconfirm
-          v-if="userInfo?.buttonNameList?.includes?.('btn.Work.remove')"
+          v-auth="'btn.Work.remove'"
           title="此操作将永久删除数据，是否继续？"
           @confirm="handleDelete(record.workId)"
         >

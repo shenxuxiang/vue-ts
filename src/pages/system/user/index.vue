@@ -8,7 +8,7 @@ import {
   resetSystemUserPassword,
 } from "@/services/systemUser";
 import { Space, Button, Popconfirm, message, Tag } from "ant-design-vue";
-import ContentFormTable from "@/components/ContentFormTable";
+import { ContentFormTable } from "qm-vnit-vue";
 import useSystemStore from "@/store/system";
 import useMainStore from "@/store/main";
 import UserModal from "./UserModal.vue";
@@ -21,10 +21,8 @@ const mainStore = useMainStore();
 const systemStore = useSystemStore();
 const { queryRegionList } = mainStore;
 const { queryRoleList, queryDictIdTypeList } = systemStore;
-const { regionList, userInfo } = storeToRefs(mainStore);
-console.log(userInfo);
+const { regionList } = storeToRefs(mainStore);
 const { roleList, dictIdTypeList } = storeToRefs(systemStore);
-const { buttonNameList } = userInfo.value;
 
 isEmpty(regionList.value) && queryRegionList();
 isEmpty(dictIdTypeList.value) && queryDictIdTypeList();
@@ -187,29 +185,23 @@ function handleAddUser() {
           v-else-if="column.dataIndex === 'action'"
           style="margin-left: -16px"
         >
-          <template v-if="buttonNameList.includes('btn.User.remove')">
-            <Popconfirm
-              title="此操作将永久删除数据，是否继续？"
-              @confirm="handleDelete(record.userId)"
-            >
-              <Button danger type="link"> 删除 </Button>
-            </Popconfirm>
-          </template>
+          <Popconfirm
+            title="此操作将永久删除数据，是否继续？"
+            @confirm="handleDelete(record.userId)"
+          >
+            <Button danger type="link" v-auth="'btn.User.remove'">删除</Button>
+          </Popconfirm>
 
-          <template v-if="buttonNameList.includes('btn.User.update')">
-            <Button type="link" @click="handleEdit(record.userId)">
-              编辑
-            </Button>
-          </template>
+          <Button type="link" @click="handleEdit(record.userId)" v-auth="'btn.User.update'">
+            编辑
+          </Button>
 
-          <template v-if="buttonNameList.includes('btn.User.resetPwd')">
-            <Popconfirm
-              title="此操作将重置用户密码，是否继续？"
-              @confirm="handleResetPassword(record.userId)"
-            >
-              <Button type="link">重置密码</Button>
-            </Popconfirm>
-          </template>
+          <Popconfirm
+            title="此操作将重置用户密码，是否继续？"
+            @confirm="handleResetPassword(record.userId)"
+          >
+            <Button type="link" v-auth="'btn.User.resetPwd'">重置密码</Button>
+          </Popconfirm>
         </Space>
       </template>
     </ContentFormTable>

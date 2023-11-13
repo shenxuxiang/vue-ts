@@ -16,19 +16,19 @@ import {
 import AreaStatisticsIcon from "./components/AreaStatisticsIcon.vue";
 import OperatorWorkRank from "./components/OperatorWorkRank.vue";
 import WorkDistribution from "./components/WorkDistribution.vue";
-import ContentFormHeader from "@/components/ContentFormHeader";
 import useStatisticsStore from "@/store/statistics";
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed, watchEffect, inject } from "vue";
 import PieChart from "./components/PieChart.vue";
+import { ContentFormHeader } from "qm-vnit-vue";
 import { Row, Col } from "ant-design-vue";
 import useMainStore from "@/store/main";
 import { storeToRefs } from "pinia";
 import { isEmpty } from "@/utils";
 import dayjs from "dayjs";
+import type { BasicContextType } from "@/common/basicContext";
 
 const mainStore = useMainStore();
-const { userInfo, regionList, workSeasonList, productTypeList, workTypeList } =
-  storeToRefs(mainStore);
+const { regionList, workSeasonList, productTypeList, workTypeList } = storeToRefs(mainStore);
 const {
   queryRegionList,
   queryWorkSeasonList,
@@ -37,13 +37,14 @@ const {
 } = mainStore;
 
 const statisticsStore = useStatisticsStore();
-const { statisticArea, productionProcessPercent, workTypePercent } =
-  storeToRefs(statisticsStore);
+const { statisticArea, productionProcessPercent, workTypePercent } = storeToRefs(statisticsStore);
 const {
+  queryWorkTypePercent,
   queryWorkStatisticArea,
   queryProductionProcessPercent,
-  queryWorkTypePercent,
 } = statisticsStore;
+
+const { basicContext } = inject<BasicContextType>('basicContext')!;
 
 // 发送请求
 isEmpty(regionList.value) && queryRegionList();
@@ -53,9 +54,9 @@ isEmpty(productTypeList.value) && queryProductTypeList();
 
 // 工作地点
 const workPlaceList = computed(() => {
-  const { regionCode } = userInfo.value;
   if (isEmpty(regionList.value)) return [];
-  return filterRegionList(regionCode, regionList.value);
+
+  return filterRegionList(basicContext.userInfo?.regionCode, regionList.value);
 });
 
 const state = ref({

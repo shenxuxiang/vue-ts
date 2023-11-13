@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import ContentFormTable from "@/components/ContentFormTable";
 import OperatorSelect from "@/components/OperatorSelect.vue";
 import { queryWorkInfoPageList } from "@/services/workInfo";
+import { ContentFormTable } from "qm-vnit-vue";
 import { h, reactive, computed } from "vue";
 import { isEmpty, toFixed } from "@/utils";
 import { Button } from "ant-design-vue";
 import useMainStore from "@/store/main";
 import { storeToRefs } from "pinia";
 
-
 const mainStore = useMainStore();
-const { regionList, workSeasonList, productTypeList, workTypeList } =
-  storeToRefs(mainStore);
+const { regionList, workSeasonList, productTypeList, workTypeList } = storeToRefs(mainStore);
 const {
   queryRegionList,
+  queryWorkTypeList,
   queryWorkSeasonList,
   queryProductTypeList,
-  queryWorkTypeList,
 } = mainStore;
 
 // 发送请求-regionList
@@ -127,7 +125,9 @@ function handlePaginationChange(pageNum: number, pageSize: number) {
             type="link"
             style="margin-left: -16px"
             @click="handleNavigateToDetail(record.workId)"
-            >查看详情</Button
+          >
+            查看详情
+          </Button
           >
         </template>
       </template>

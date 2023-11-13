@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Popconfirm, Space, message } from "ant-design-vue";
-import ContentFormTable from "@/components/ContentFormTable";
+import { ContentFormTable } from "qm-vnit-vue";
 import WorkTypeModal from "./WorkTypeModal.vue";
 import { isEmpty, toFixed } from "@/utils";
 import useMainStore from "@/store/main";
@@ -16,8 +16,7 @@ import {
 
 const mainStore = useMainStore();
 const { queryProductTypeList } = mainStore;
-const { productTypeList, userInfo } = storeToRefs(mainStore);
-const { buttonNameList } = userInfo.value;
+const { productTypeList } = storeToRefs(mainStore);
 
 isEmpty(productTypeList) && queryProductTypeList();
 
@@ -132,20 +131,16 @@ function handlePaginationChange(current: number, size: number) {
 
         <template v-else-if="column.dataIndex === 'action'">
           <Space style="margin-left: -16px">
-            <template v-if="buttonNameList?.includes('btn.WorkType.remove')">
-              <Popconfirm
-                title="此操作将永久删除数据，是否继续？"
-                @confirm="handleDelete(record.jobTypeId)"
-              >
-                <Button danger type="link"> 删除 </Button>
-              </Popconfirm>
-            </template>
+            <Popconfirm
+              title="此操作将永久删除数据，是否继续？"
+              @confirm="handleDelete(record.jobTypeId)"
+            >
+              <Button danger type="link" v-auth="'btn.WorkType.remove'"> 删除 </Button>
+            </Popconfirm>
 
-            <template v-if="buttonNameList?.includes('btn.WorkType.update')">
-              <Button type="link" @click="handleEdit(record.jobTypeId)">
-                编辑
-              </Button>
-            </template>
+            <Button type="link" @click="handleEdit(record.jobTypeId)" v-auth="'btn.WorkType.update'">
+              编辑
+            </Button>
           </Space>
         </template>
       </template>

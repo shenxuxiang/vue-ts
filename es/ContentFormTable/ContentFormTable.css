@@ -1,0 +1,22 @@
+.qm-content-form-table {
+  padding: 24px 24px 0;
+}
+.qm-content-form-table-body {
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+}
+.qm-content-form-table-body-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  padding: 0 0 20px;
+  box-sizing: content-box;
+}
+.qm-content-form-table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 20px;
+}

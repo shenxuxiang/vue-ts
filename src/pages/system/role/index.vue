@@ -8,19 +8,14 @@ import {
   updateSysRolePermission,
 } from "@/services/systemRole";
 import { Tag, Button, Popconfirm, message } from "ant-design-vue";
-import ContentFormTable from "@/components/ContentFormTable";
 import PermissionModal from "./PermissionModal.vue";
+import { ContentFormTable } from "qm-vnit-vue";
 import useSystemStore from "@/store/system";
-import useMainStore from "@/store/main";
 import RoleModal from "./RoleModal.vue";
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { isEmpty } from "@/utils";
 import dayjs from "dayjs";
-
-const mainStore = useMainStore();
-const { userInfo } = storeToRefs(mainStore);
-const { buttonNameList } = userInfo.value;
 
 const systemStore = useSystemStore();
 const { querySysResourceList } = systemStore;
@@ -150,27 +145,21 @@ function handleSuccessPermissionModal() {
         </template>
 
         <template v-else-if="column.dataIndex === 'action'">
-          <template v-if="buttonNameList.includes('btn.Role.remove')">
-            <Popconfirm
-              :overlayStyle="{ width: '300px' }"
-              title="角色删除后，关联该角色的用户将无权限使用系统，是否确定继续？"
-              @confirm="handleDelete(record.roleId)"
-            >
-              <Button danger type="link"> 删除 </Button>
-            </Popconfirm>
-          </template>
+          <Popconfirm
+            :overlayStyle="{ width: '300px' }"
+            title="角色删除后，关联该角色的用户将无权限使用系统，是否确定继续？"
+            @confirm="handleDelete(record.roleId)"
+          >
+            <Button danger type="link" v-auth="'btn.Role.remove'"> 删除 </Button>
+          </Popconfirm>
 
-          <template v-if="buttonNameList.includes('btn.Role.update')">
-            <Button type="link" @click="handleEdit(record.roleId)">
-              编辑
-            </Button>
-          </template>
+          <Button type="link" @click="handleEdit(record.roleId)" v-auth="'btn.Role.update'">
+            编辑
+          </Button>
 
-          <template v-if="buttonNameList.includes('btn.Role.assign')">
-            <Button type="link" @click="handleUpdatePermission(record.roleId)">
-              权限设置
-            </Button>
-          </template>
+          <Button type="link" @click="handleUpdatePermission(record.roleId)" v-auth="'btn.Role.assign'">
+            权限设置
+          </Button>
         </template>
       </template>
     </ContentFormTable>

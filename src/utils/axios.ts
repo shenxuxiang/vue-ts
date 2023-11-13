@@ -1,178 +1,174 @@
-import type {
-  AxiosRequestConfig,
-  AxiosInstance,
-  InternalAxiosRequestConfig,
-  AxiosResponse,
-  AxiosError,
-} from "axios";
-import axios from "axios";
-import { getToken, matchPath } from "@/utils";
-import { message } from "ant-design-vue";
-import router from "@/router";
-
-enum ResponseCode {
-  successCode = 0,
-  overdueCode = 401,
-}
-
-const statusCode = {
-  200: "200 OK",
-  400: "400 Bad Request",
-  401: "401 Unauthorized",
-  403: "403 Forbidden",
-  404: "404 Not Found",
-  405: "405 Method Not Allowed",
-  408: "408 Request Timeout",
-  500: "500 Internal Server Error",
-  501: "501 Not Implemented",
-  502: "502 Bad Gateway",
-  503: "503 Service Unavailable",
-  504: "504 Gateway Timeout",
-  505: "505 HTTP Version Not Supported",
-  510: "510 Not Extended",
-  511: "511 Network Authentication Required",
-};
+import axios from 'axios';
+import router from '@/router';
+import { getUserToken } from '@/utils';
+import { message } from 'ant-design-vue';
+import type { InternalAxiosRequestConfig, AxiosRequestConfig, AxiosResponse, AxiosInstance, AxiosError } from 'axios';
 
 let abortController = new AbortController();
 
-function cancelRequest() {
+function abortRequest() {
   if (abortController) {
     abortController.abort();
     abortController = new AbortController();
   } else {
     abortController = new AbortController();
   }
-} 
+}
 
-const defaultConfigOptions: AxiosRequestConfig = {
-  baseURL: "",
+const statusCode = {
+  200: '200 OK',
+  400: '400 Bad Request',
+  401: '401 Unauthorized',
+  403: '403 Forbidden',
+  404: '404 Not Found',
+  405: '405 Method Not Allowed',
+  408: '408 Request Timeout',
+  500: '500 Internal Server Error',
+  501: '501 Not Implemented',
+  502: '502 Bad Gateway',
+  503: '503 Service Unavailable',
+  504: '504 Gateway Timeout',
+  505: '505 HTTP Version Not Supported',
+  510: '510 Not Extended',
+  511: '511 Network Authentication Required',
+};
+
+enum ResponseCode {
+  successCode = 0,
+  overdueCode = 401,
+}
+
+type RequestParams = { [key: string]: any };
+
+type ResponseData = {
+  data?: any;
+  code?: number;
+  message?: string;
+};
+
+const defaultRequestConfig: AxiosRequestConfig = {
+  baseURL: '',
   timeout: 60000,
   withCredentials: true,
 };
 
-class Request {
+class Request<AxiosRequestConfig> {
   public instance: AxiosInstance;
-  public configOptions: AxiosRequestConfig;
-  constructor(options?: AxiosRequestConfig) {
-    this.configOptions = { ...defaultConfigOptions, ...options };
 
-    this.instance = axios.create(this.configOptions);
+  constructor(config?: AxiosRequestConfig) {
+    this.instance = axios.create({ ...defaultRequestConfig, ...config });
 
-    this.instance.interceptors.request.use(
-      this.onRequestFulfull.bind(this),
-      this.onRequestReject.bind(this),
-    );
-
-    this.instance.interceptors.response.use(
-      this.onResponseFulFull.bind(this),
-      this.onResponseReject.bind(this),
-    );
+    this.instance.interceptors.request.use(this.onFulfilledRequest, this.onRejectedRequest);
+    this.instance.interceptors.response.use(this.onFulfilledResponse, this.onRejectedResponse);
   }
 
-  onRequestFulfull(config: InternalAxiosRequestConfig) {
+  onFulfilledRequest = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     return {
       ...config,
-      // 用于取消请求的标记
       signal: abortController.signal,
-      // 不要强制设置 contentType, 这样不利于 axios 的扩展，axios 可以根据 request body 自动定义 contentType 类型
-      headers: { Authorization: getToken() } as any,
+      headers: {
+        Authorization: 'Bearer  ' + getUserToken(),
+      } as any,
     };
-  }
+  };
 
-  onRequestReject(error: Error) {
+  onRejectedRequest = (error: any) => {
     return Promise.reject(error);
-  }
+  };
 
-  onResponseFulFull(response: AxiosResponse) {
+  onFulfilledResponse = (response: AxiosResponse): Promise<AxiosResponse> => {
     const {
       data,
       headers,
-      data: { code },
-      config: { responseType },
+      request: { responseType },
     } = response;
 
-    // 下载文件处理
-    if (responseType === "blob") {
-      const matched = /^attachment;\s*filename\*?=(?:utf-8'')?([^,]+)/.exec(
-        headers["content-disposition"] ?? "",
-      );
-      let fileName = "default_";
-      if (matched) fileName = decodeURIComponent(matched[1]);
+    // 下载文件，blob 直接用于文件的下载
+    if (responseType === 'blob') {
+      let fileName = headers['content-disposition'] ?? '';
 
-      return Promise.resolve({ fileName, data });
+      const matched = /^attachment;\s*filename\*?=(?:utf-8'')?([^,]+)/.exec(fileName);
+      if (matched === null) {
+        fileName = 'defaultName';
+      } else {
+        fileName = decodeURIComponent(matched[1]);
+      }
+      return Promise.resolve({ data, fileName: fileName } as any);
     }
 
-    // 接口异常处理（非登陆凭证失效场景）
-    if (typeof code !== "undefined" && code !== ResponseCode.successCode) {
-      message.error(data.message);
+    if (typeof data.code === 'undefined' || data.code === ResponseCode.successCode) {
+      return Promise.resolve(data);
+    }
+
+    if (data.code === ResponseCode.overdueCode) {
+      message.error(data.message || '登录已过期，请重新登录');
+      abortRequest();
+      window.localStorage.clear();
+      this.redirectionToLogin();
       return Promise.reject(data);
     }
 
-    // 用户登录失效
-    if (code && code === ResponseCode.overdueCode) {
-      this.redirectToLogin();
-      return Promise.reject(data);
-    }
+    message.error(data.message || '请求异常，请联系管理员');
+    return Promise.reject(data);
+  };
 
-    return Promise.resolve(data);
-  }
-
-  onResponseReject(error: AxiosError) {
-    const { response, code, request } = error;
-    if (response) {
-      this.checkStatus(response!.status);
-    } else if (code === "ERR_CANCELED") {
-      console.log(`${request.url}：请求已取消！`);
+  onRejectedResponse = (error: AxiosError) => {
+    if (error.response) {
+      this.checkStatus(error.response.status);
     } else if (!window.navigator.onLine) {
-      message.error("网络连接失败！");
+      message.error('网络连接失败');
+    } else if (error.code === 'ERR_CANCELED') {
+      // 请求被取消
+      console.log(error.stack);
     } else {
-      message.error("请求失败，请联系管理员！");
+      message.error('请求失败，请联系管理员');
     }
+    return Promise.reject(null);
+  };
 
-    return Promise.reject(error);
-  }
-
-  redirectToLogin() {
-    // 所有取消请求
-    cancelRequest();
-    // 清楚所有缓存数据。
-    window.localStorage.clear();
-    message.warning("用户登录失效，请重新登录！");
-
-    const { push, currentRoute } = router;
-    if (matchPath("/login", currentRoute.value.fullPath)) return;
-    push("/login");
-  }
-
-  checkStatus(status: number) {
+  // 校验状态码
+  checkStatus(status: number): void {
     switch (status) {
       case 401:
       case 403:
-        this.redirectToLogin();
+        abortRequest();
+        message.error('用户暂未登录！');
+        window.localStorage.clear();
+        this.redirectionToLogin();
         break;
       default:
         message.error(statusCode[status as keyof typeof statusCode]);
+        break;
     }
   }
 
-  get(url: string, params?: any, config?: AxiosRequestConfig) {
-    return this.instance.get(url, { ...config, params });
+  // 重定向到登录页
+  redirectionToLogin() {
+    const { push, currentRoute } = router;
+    const fullPath = currentRoute.value.fullPath;
+    if (fullPath === '/login') return;
+    const querystring = window.encodeURIComponent(fullPath);
+    push('/login?redirection=' + querystring);
   }
 
-  post(url: string, data?: any, config?: AxiosRequestConfig) {
-    return this.instance.post(url, data, config);
+  get(url: string, params?: RequestParams): Promise<ResponseData> {
+    return this.instance.get(url, { params });
   }
 
-  getBlob(url: string, params?: any, config?: AxiosRequestConfig) {
-    return this.instance.get(url, { ...config, params, responseType: "blob" });
+  getBlob(url: string, params?: RequestParams): Promise<ResponseData> {
+    return this.instance.get(url, { params, responseType: 'blob' });
   }
 
-  put(url: string, data?: any, config?: AxiosRequestConfig) {
-    return this.instance.post(url, data, config);
+  delete(url: string, params?: RequestParams): Promise<ResponseData> {
+    return this.instance.delete(url, { data: params });
   }
 
-  delete(url: string, data?: any, config?: AxiosRequestConfig) {
-    return this.instance.delete(url, { ...config, data });
+  post(url: string, params?: RequestParams, config?: AxiosRequestConfig): Promise<ResponseData> {
+    return this.instance.post(url, params, config!);
+  }
+
+  put(url: string, params?: RequestParams, config?: AxiosRequestConfig): Promise<ResponseData> {
+    return this.instance.put(url, params, config!);
   }
 }
 

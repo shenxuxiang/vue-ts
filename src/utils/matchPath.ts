@@ -1,13 +1,9 @@
-import { pathToRegexp } from "path-to-regexp";
-import type { Key } from "path-to-regexp";
+import { pathToRegexp } from 'path-to-regexp';
+import type { Key } from 'path-to-regexp';
 
 const MAP_CACHE = new Map<string, { reg: RegExp; paramNames: Key[] }>();
 
-export default function matchPath(
-  path: string,
-  pathname: string,
-  options = {},
-): [RegExpExecArray, Key[]] | null {
+export default function matchPath(path: string, pathname: string, options = {}): [RegExpExecArray, Key[]] | null {
   const cache = MAP_CACHE.get(path);
   let reg: RegExp;
   let paramNames: Key[] = [];

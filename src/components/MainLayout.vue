@@ -1,39 +1,29 @@
 <script setup lang="ts">
-import { Popover, Layout, Avatar, Menu, Button, Space } from "ant-design-vue";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons-vue";
-import { RouterView, useRouter, useRoute } from "vue-router";
-import avatarUrl from "@/assets/avatar.png";
-import { logout } from "@/services/login";
-import useMainStore from "@/store/main";
-import { storeToRefs } from "pinia";
-import { ref, watch } from "vue";
+import { Popover, Layout, Avatar, Menu, Button, Space } from 'ant-design-vue';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
+import type { BasicContextType } from '@/common/basicContext';
+import { RouterView, useRouter, useRoute } from 'vue-router';
+import avatarUrl from '@/assets/images/avatar.png';
+import { ref, watch, inject, toRefs } from 'vue';
+import { logout } from '@/services/login';
 
 const { Content, Sider, Header, Footer } = Layout;
-const router = useRouter();
+
 const route = useRoute();
-const mainStore = useMainStore();
-const { menuItems, userInfo } = storeToRefs(mainStore);
+const router = useRouter();
 const menuCollapse = ref(false);
 const openKeys = ref<string[]>([]);
 const selectedKeys = ref<string[]>([]);
+const { basicContext } = inject<BasicContextType>('basicContext')!;
+
+const { userInfo, userMenuItems } = toRefs(basicContext);
 
 // 监听路由变化
 watch(
-  () => route.fullPath,
-  (fullPath: string) => {
-    selectedKeys.value = [fullPath];
-
-    const reg = /(\/[^\/]+)/g;
-    const keys: string[] = [];
-    while (reg.exec(fullPath)) {
-      keys.push(RegExp.$1);
-    }
-
-    openKeys.value = keys.reduce((memo, key) => {
-      const prev = memo[memo.length - 1] || "";
-      memo.push(prev + key);
-      return memo;
-    }, [] as string[]);
+  [userInfo, () => route.fullPath],
+  () => {
+    selectedKeys.value = [route.fullPath];
+    handleExpandKeys(route.fullPath);
   },
   { immediate: true },
 );
@@ -48,16 +38,24 @@ function handleChangeSelectedKeys(values: any) {
 }
 
 function handleLogout() {
-  logout().then((res: any) => {
-    if (res.code === 0) router.push("/login");
-  });
+  logout().then(() => router.push('/login'));
 }
 
 function handleUpdatePasswd() {
-  router.push("/update-password");
+  router.push('/update-passwd');
 }
 
-watch(openKeys, () => console.log(openKeys.value, 11111))
+function handleExpandKeys(fullPath: string) {
+  const reg = /(\/[^\/]+)/g;
+  const keys: string[] = [];
+  let i = 0;
+  while (reg.test(fullPath)) {
+    const prev = keys[i - 1] || '';
+    keys.push(prev + RegExp.lastParen);
+    i++;
+  }
+  openKeys.value = keys;
+}
 </script>
 
 <template>
@@ -65,25 +63,20 @@ watch(openKeys, () => console.log(openKeys.value, 11111))
     <Sider theme="light" :width="240" :collapsed="menuCollapse">
       <section class="qm-logo">
         <div class="qm-log-bg" />
-        <h1 :class="['qm-log-title', { hide: menuCollapse }]">
-          界首市农机作业平台
-        </h1>
+        <h1 :class="['qm-log-title', { hide: menuCollapse }]">界首市农机作业平台</h1>
       </section>
       <Menu
-        mode="inline"
-        :items="menuItems as any"
-        :inlineCollapsed="menuCollapse"
-        :selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
+        mode="inline"
+        :selectedKeys="selectedKeys"
+        :inlineCollapsed="menuCollapse"
+        :items="userMenuItems as any"
         @select="handleChangeSelectedKeys"
       />
     </Sider>
     <Layout>
       <Header class="qm-header">
-        <div
-          class="control-menu-collapse-icon"
-          @click="handleTriggerMenuCollapse"
-        >
+        <div class="control-menu-collapse-icon" @click="handleTriggerMenuCollapse">
           <MenuFoldOutlined v-if="menuCollapse" />
           <MenuUnfoldOutlined v-else />
         </div>
@@ -95,7 +88,7 @@ watch(openKeys, () => console.log(openKeys.value, 11111))
             </Space>
           </template>
           <div class="qm-avatar">
-            <Avatar :size="48" :src="avatarUrl" />
+            <Avatar :size="48" :src="userInfo.avater || avatarUrl" />
             {{ userInfo.username }}
           </div>
         </Popover>
@@ -108,9 +101,7 @@ watch(openKeys, () => console.log(openKeys.value, 11111))
             </Transition>
           </RouterView>
         </div>
-        <Footer class="qm-footer"
-          >安徽阡陌网络科技有限公司 ©2022 Created by Qianmo</Footer
-        >
+        <Footer class="qm-footer">安徽阡陌网络科技有限公司 ©2022 Created by Qianmo</Footer>
       </Content>
     </Layout>
   </Layout>
@@ -127,7 +118,7 @@ watch(openKeys, () => console.log(openKeys.value, 11111))
   &::after {
     position: absolute;
     bottom: 0;
-    content: "";
+    content: '';
     height: 0.5px;
     width: 100%;
     background: rgba(1, 1, 1, 0.03);
@@ -138,7 +129,7 @@ watch(openKeys, () => console.log(openKeys.value, 11111))
   width: 48px;
   height: 48px;
   margin-left: 15px;
-  background: url(@/assets/logo.png) no-repeat left top / contain;
+  background: url(@/assets/images/logo.png) no-repeat left top / contain;
 }
 .qm-log-title {
   flex: 1 0 0;
@@ -181,6 +172,7 @@ watch(openKeys, () => console.log(openKeys.value, 11111))
   overflow: auto;
 }
 .qm-page-content {
+  position: relative;
   display: inline-block;
   width: 100%;
   min-height: calc(100vh - 126px);

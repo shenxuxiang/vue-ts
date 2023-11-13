@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Modal, Input, Form, message } from "ant-design-vue";
-import type { TreeData } from "@/components/ModuleTree";
-import ModuleTree from "@/components/ModuleTree";
+import type { TreeData } from "qm-vnit-vue/es/ModelTree";
+import { ModelTree } from "qm-vnit-vue";
 import { isEmpty } from "@/utils";
 import { ref, watch } from "vue";
 
@@ -29,7 +29,7 @@ const formModels = ref({
   expandedKeys: [] as string[],
 });
 const { resetFields } = useForm(formModels);
-const moduleTreeRef = ref<InstanceType<typeof ModuleTree>>();
+const ModelTreeRef = ref<InstanceType<typeof ModelTree>>();
 
 watch([() => props.open, () => props.roleId], _getRoleDetail);
 
@@ -41,7 +41,7 @@ function _getRoleDetail() {
         const { roleName, remark, resourceIdList } = data;
         const parentKeys: Array<string | number> = [];
         resourceIdList.forEach((id: string) => {
-          const keys = moduleTreeRef.value!.getParentKeys(id);
+          const keys = ModelTreeRef.value!.getParentKeys(id);
           parentKeys.push(...keys.slice(1));
         });
 
@@ -61,7 +61,7 @@ function handleOk() {
   const resourceIdList: Array<string | number> = [];
 
   formModels.value.permission.forEach((id) => {
-    resourceIdList.push(...moduleTreeRef.value!.getParentKeys(id));
+    resourceIdList.push(...ModelTreeRef.value!.getParentKeys(id));
   });
 
   props
@@ -137,8 +137,8 @@ function afterClose() {
       </FormItem>
 
       <FormItem name="permission" label="web端权限">
-        <ModuleTree
-          ref="moduleTreeRef"
+        <ModelTree
+          ref="ModelTreeRef"
           v-model:checkedKeys="formModels.permission"
           v-model:expandedKeys="formModels.expandedKeys"
           :treeData="resourceTree"

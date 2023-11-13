@@ -5,17 +5,11 @@ import {
   queryAppVersionTableList,
   querySystemAppVersionDetail,
 } from "@/services/systemAppVersion";
-import ContentFormTable from "@/components/ContentFormTable";
 import { Space, Button, Modal, Image } from "ant-design-vue";
 import AppVersionModal from "./AppVersionModal.vue";
+import { ContentFormTable } from "qm-vnit-vue";
 import { h, ref, shallowRef } from "vue";
-import useMainStore from "@/store/main";
-import { storeToRefs } from "pinia";
 import dayjs from "dayjs";
-
-const mainStore = useMainStore();
-const { userInfo } = storeToRefs(mainStore);
-const { buttonNameList } = userInfo.value;
 
 const appVersionId = ref("");
 const showAppVersionModal = ref(false);
@@ -97,11 +91,9 @@ function handleSuccessModal() {
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'action'">
           <Space>
-            <template v-if="buttonNameList.includes('btn.appVersion.update')">
-              <Button type="link" @click="handleEdit(record.appVersionId)">
-                编辑
-              </Button>
-            </template>
+            <Button type="link" @click="handleEdit(record.appVersionId)" v-auth="'btn.appVersion.update'">
+              编辑
+            </Button>
 
             <Button type="link" @click="handleLookQrCode(record.qrCodeUrl)">
               查看二维码

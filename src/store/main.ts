@@ -1,44 +1,23 @@
 import { defineStore } from "pinia";
 import {
-  queryUserInfo,
   queryRegionList,
+  queryWorkTypeList,
   queryWorkSeasonList,
   queryProductTypeList,
-  queryWorkTypeList,
 } from "@/services/index";
-import { computedMenuResource, computedPermissions } from "@/router";
-import type { MenuItem, Permissions } from "@/router";
-import routerMap from "@/router/routerMap";
 
 type SourceList = Array<{ value: string | number; label: string }>;
 
 export default defineStore("mainStore", {
   state() {
     return {
-      userInfo: {} as any,
-      menuItems: [] as MenuItem[],
-      permissions: new Set() as Permissions,
       regionList: [] as SourceList,
+      workTypeList: [] as SourceList,
       workSeasonList: [] as SourceList,
       productTypeList: [] as SourceList,
-      workTypeList: [] as SourceList,
     };
   },
   actions: {
-    queryUserInfo: function () {
-      return queryUserInfo().then((res: any) => {
-        const { code, data } = res;
-        if (code === 0) {
-          this.userInfo = res.data;
-          this.permissions = computedPermissions(data?.resourceTree ?? []);
-          this.menuItems = computedMenuResource(
-            this.permissions,
-            routerMap as any,
-          );
-        }
-        return res;
-      });
-    },
     queryRegionList: function () {
       return queryRegionList().then((res: any) => {
         const { code, data } = res;
